@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "macstevins.soundsplus.fabric.client.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"SoundOptionsScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

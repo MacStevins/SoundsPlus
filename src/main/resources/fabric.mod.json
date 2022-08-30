@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "soundsplus",
+	"version": "${version}",
+	
+	"name": "Sounds+",
+	"description": "Adds more functionality to the sounds options",
+	"authors": [
+		"MacStevins"
+	],
+	"contact": {
+		"homepage": "https://macstevins.github.com/",
+		"sources": "https://github.com/MacStevins"
+	},
+	
+	"license": "WTFPL",
+	"icon": "assets/soundsplus/icon.png",
+	
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"macstevins.soundsplus.fabric.client.SoundsPlusModClient"
+		],
+		"modmenu": [
+			"macstevins.soundsplus.fabric.client.modmenu.SoundsPlusModMenu"
+		]
+	},
+	"mixins": [
+		"soundsplus.mixins.json"
+	],
+	"accessWidener": "soundsplus.accesswidener",
+	
+	"depends": {
+		"fabricloader": ">=0.14.8",
+		"fabric": "*",
+		"minecraft": "~1.18.2",
+		"java": ">=17"
+	}
+}

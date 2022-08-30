@@ -1,0 +1,5 @@
+accessWidener v1 named
+
+accessible field net/minecraft/client/sound/WeightedSoundSet sounds Ljava/util/List;
+mutable field net/minecraft/client/sound/Sound volume F
+accessible field net/minecraft/client/sound/Sound volume F

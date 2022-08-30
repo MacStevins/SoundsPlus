@@ -1,0 +1,8 @@
+{
+	"debug.debug_jingle": {
+		"sounds": [
+			"soundsplus:debug/debug_jingle"
+		],
+		"subtitle": "soundsplus.subtitles.debug.debug_jingle"
+	}
+}
