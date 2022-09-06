@@ -22,7 +22,7 @@ public class ModUtil {
 
 	public static final String MOD_NAME = "Sounds+" + (DEBUG_MODE ? " (Debug Mode)" : "");
 
-	public static final String MOD_VERSION = "0.5.0-1.18.2";
+	public static final String MOD_VERSION = "0.5.1-1.18.2";
 
 	/** Mod Utilities */
 

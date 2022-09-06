@@ -37,17 +37,19 @@ public class SoundVolumeListWidget extends ElementListWidget<SoundVolumeListWidg
 
 	private final SoundManager soundManager;
 
-	private final SoundsPlusConfigManager configManager;
+	private final SoundsPlusConfig config = SoundsPlusConfigManager.getConfig();
+
+	private final SoundsPlusConfigManager configManager = SoundsPlusConfigManager.getInstance();
 
 	private final TextRenderer textRenderer;
 
-	private final Thread entriesLoader;
-
 	private final String[] progressStages = new String[] {"oooooo", "Oooooo", "oOoooo", "ooOooo", "oooOoo", "ooooOo", "oooooO"};
 
-	private boolean isEntriesLoaded = false;
+	private Thread entriesLoader;
 
 	private float sideGap = -6;
+
+	private int isEntriesLoaded = -1;
 
 	private int longestLength = 0;
 
@@ -58,56 +60,12 @@ public class SoundVolumeListWidget extends ElementListWidget<SoundVolumeListWidg
 		this.parent = parent;
 		language = Language.getInstance();
 		soundManager = client.getSoundManager();
-		configManager = SoundsPlusConfigManager.getInstance();
 		textRenderer = client.textRenderer;
 		
-		SoundsPlusConfig config = SoundsPlusConfigManager.getConfig();
-		
-		entriesLoader = new Thread(() -> {
-			
-			synchronized(client.gameRenderer) {
-			
-				try {
-					
-					Thread.sleep(500);
-					
-					List<Identifier> keys = new ArrayList<>(soundManager.getKeys());
-					List<String> namespaces = new ArrayList<>();
-					keys.sort(Comparator.comparing(Identifier::toString));
-					
-					for(Identifier id : keys) {
-						
-						if(!namespaces.contains(id.getNamespace())) {
-							
-							String categoryKey = ModUtil.MOD_ID + ".namespace." + id.getNamespace();
-							
-							addEntry(new CategoryEntry(new LiteralText(language.hasTranslation(categoryKey) ?
-									language.get(categoryKey) :
-									StringUtil.capitalizeEachWord(id.getNamespace()))));
-							
-							namespaces.add(id.getNamespace());
-							configManager.createNamespaceConfig(id.getNamespace());
-						
-						}
-						
-						addEntry(new VolumeEntry(new LiteralText(translateKeyBites(id)), id));
-						
-						if(config.isSlowMode())
-							Thread.sleep(0, 1);
-					
-					}
-					
-					addEntry(new EmptyEntry());
-					isEntriesLoaded = true;
-					
-					System.gc();
-				
-				}
-				catch(Exception e) { ModUtil.logError(e); }
-			
-			}
-		
-		}, this.getClass().getSimpleName());
+		if(config.isThreaded())
+			entriesLoader = new Thread(this::createEntries, this.getClass().getSimpleName());
+		else
+			createEntries();
 	
 	}
 
@@ -137,20 +95,74 @@ public class SoundVolumeListWidget extends ElementListWidget<SoundVolumeListWidg
 	
 	}
 
+	private void createEntries() {
+		
+		synchronized(client.gameRenderer) {
+			
+			try {
+				
+				Thread.sleep(500);
+				
+				List<Identifier> keys = new ArrayList<>(soundManager.getKeys());
+				List<String> namespaces = new ArrayList<>();
+				keys.sort(Comparator.comparing(Identifier::toString));
+				
+				for(Identifier id : keys) {
+					
+					if(!namespaces.contains(id.getNamespace())) {
+						
+						String categoryKey = ModUtil.MOD_ID + ".namespace." + id.getNamespace();
+						
+						addEntry(new CategoryEntry(new LiteralText(language.hasTranslation(categoryKey) ?
+								language.get(categoryKey) :
+								StringUtil.capitalizeEachWord(id.getNamespace()))));
+						
+						namespaces.add(id.getNamespace());
+						configManager.createNamespaceConfig(id.getNamespace());
+						
+					}
+					
+					addEntry(new VolumeEntry(new LiteralText(translateKeyBites(id)), id));
+					
+					if(config.isSlowMode())
+						Thread.sleep(0, 1);
+					
+				}
+				
+				addEntry(new EmptyEntry());
+				isEntriesLoaded = 1;
+				
+				System.gc();
+				
+			}
+			catch(Exception e) { ModUtil.logError(e); }
+			
+		}
+	
+	}
+
 	@Override
 	public int getRowWidth() { return client.getWindow().getScaledWidth() - (int) (sideGap * 2) - 14; }
 
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		
-		if(!isEntriesLoaded) {
+		if(config.isThreaded()) {
 			
-			drawCenteredText(matrices, textRenderer, progressStages[(int) (Util.getMeasuringTimeMs() / 150 % progressStages.length)], width / 2, height / 2, 0xFFFFFF);
+			if(isEntriesLoaded != 1) {
+				
+				drawCenteredText(matrices, textRenderer, progressStages[(int) (Util.getMeasuringTimeMs() / 150 % progressStages.length)], width / 2, height / 2, 0xFFFFFF);
+				
+				if(isEntriesLoaded == -1) {
+					
+					isEntriesLoaded = 0;
+					entriesLoader.start();
+				
+				}
+				
+				return;
 			
-			if(!entriesLoader.isAlive())
-				entriesLoader.start();
-			
-			return;
+			}
 		
 		}
 		
@@ -240,15 +252,15 @@ public class SoundVolumeListWidget extends ElementListWidget<SoundVolumeListWidg
 			&& mouseX < sideGap + textRenderer.getWidth(text) + 4
 			&& mouseY < textY + textRenderer.fontHeight + 4) {
 				
-				Text idText = new LiteralText(soundID.toString());
+//				List<Text> tooltipText = new ArrayList<>();
 				
-//				List<OrderedText> tooltipText = new ArrayList<>(textRenderer.wrapLines(idText, textRenderer.getWidth(idText)));
-//				tooltipText.add(new LiteralText("").asOrderedText());
-//				tooltipText.add(new LiteralText("Volume:").formatted(Formatting.BOLD).asOrderedText());
+//				tooltipText.add(new LiteralText(soundID.toString()));
+//				tooltipText.add(LiteralText.EMPTY);
+//				tooltipText.add(new LiteralText("Volume:").formatted(Formatting.BOLD));
 				
-//				parent.renderOrderedTooltip(matrices, tooltipText, mouseX, mouseY);
+//				parent.renderTooltip(matrices, tooltipText, mouseX, mouseY);
 				
-				parent.renderOrderedTooltip(matrices, textRenderer.wrapLines(idText, textRenderer.getWidth(idText)), mouseX, mouseY);
+				parent.renderTooltip(matrices, new LiteralText(soundID.toString()), mouseX, mouseY);
 			
 			}
 		

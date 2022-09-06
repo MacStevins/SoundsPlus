@@ -7,6 +7,6 @@ import macstevins.soundsplus.fabric.client.gui.screen.option.SoundsPlusOptionsSc
 public class SoundsPlusModMenu implements ModMenuApi {
 
 	@Override
-	public ConfigScreenFactory<?> getModConfigScreenFactory() { return parent -> new SoundsPlusOptionsScreen(parent); }
+	public ConfigScreenFactory<?> getModConfigScreenFactory() { return SoundsPlusOptionsScreen::new; }
 
 }

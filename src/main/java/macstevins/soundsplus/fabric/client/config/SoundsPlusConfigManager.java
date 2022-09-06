@@ -39,11 +39,20 @@ public class SoundsPlusConfigManager {
 			
 			createNamespaceConfigFolder();
 			
-			if(CONFIG_FILE.exists()) {
+			if(!CONFIG_FILE.exists()) {
+				
+				JsonWriter writer = createJsonWriter(CONFIG_FILE);
+				
+				GSON.toJson(config, config.getClass(), writer);
+				
+				writer.close();
+			
+			}
+			else {
 				
 				JsonReader reader = createJsonReader(CONFIG_FILE);
 				
-				config = GSON.fromJson(reader, SoundsPlusConfig.class);
+				config = GSON.fromJson(reader, config.getClass());
 				
 				reader.close();
 			
@@ -71,7 +80,7 @@ public class SoundsPlusConfigManager {
 
 	public static SoundsPlusConfig getConfig() {
 		
-		if(instance != null)
+		if(instance == null)
 			restartInstance();
 		
 		return config;

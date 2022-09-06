@@ -12,9 +12,9 @@ import net.minecraft.text.TranslatableText;
 
 public class SoundsPlusOptionsScreen extends Screen {
 
-	private Screen parent;
+	private final Screen parent;
 
-	private SoundVolumeListWidget volumeListWidget;
+	private SoundVolumeListWidget listWidget;
 
 	private boolean fromButton;
 
@@ -39,9 +39,20 @@ public class SoundsPlusOptionsScreen extends Screen {
 	}
 
 	@Override
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		
+		renderBackgroundTexture(0);
+		listWidget.render(matrices, mouseX, mouseY, delta);
+		drawCenteredText(matrices, textRenderer, title, width / 2, 15, 0xFFFFFF);
+		
+		super.render(matrices, mouseX, mouseY, delta);
+	
+	}
+
+	@Override
 	protected void init() {
 		
-		addSelectableChild(volumeListWidget = new SoundVolumeListWidget(this));
+		addSelectableChild(listWidget = new SoundVolumeListWidget(this));
 		addDrawableChild(new ButtonWidget(width / 2 - 100, height - 28, 200, 20, ScreenTexts.DONE, button -> {
 			
 			fromButton = true;
@@ -50,17 +61,6 @@ public class SoundsPlusOptionsScreen extends Screen {
 		}));
 		
 		System.gc();
-	
-	}
-
-	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		
-		renderBackgroundTexture(0);
-		volumeListWidget.render(matrices, mouseX, mouseY, delta);
-		drawCenteredText(matrices, textRenderer, this.title, this.width / 2, 15, 0xFFFFFF);
-		
-		super.render(matrices, mouseX, mouseY, delta);
 	
 	}
 

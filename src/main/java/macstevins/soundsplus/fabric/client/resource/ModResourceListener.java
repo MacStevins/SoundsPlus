@@ -53,6 +53,8 @@ public class ModResourceListener {
 				
 				}
 				
+				System.gc();
+			
 			}
 		
 		});
